@@ -1,13 +1,17 @@
 {
   "name": "bp-math",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "基于mathjs二次封装,主要用于blockpulse_dapp模板中",
   "main": "dist/bundle.js",
   "types": "dist/main.d.ts",
   "scripts": {
     "start": "rollup -c rollup.config.mjs --bundleConfigAsCjs"
   },
-  "keywords": ["blockpulse", "blockpulse_dapp", "mathjs"],
+  "keywords": [
+    "blockpulse",
+    "blockpulse_dapp",
+    "mathjs"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -21,17 +25,16 @@
     "@rollup/plugin-terser": "^0.4.1",
     "@rollup/plugin-typescript": "^11.1.0",
     "core-js": "^3.30.1",
+    "ethers": "^6.3.0",
+    "mathjs": "^11.8.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-serve": "^2.0.2",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.34.1"
+    "rollup-plugin-typescript2": "^0.34.1",
+    "typescript": "^5.0.4"
   },
-  "dependencies": {
-    "ethers": "5.6.9",
-    "mathjs": "^11.8.0",
-    "typescript": "4.6.4"
-  }
+  "dependencies": {}
 }

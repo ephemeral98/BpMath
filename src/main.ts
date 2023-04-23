@@ -88,7 +88,7 @@ function bpBaseCalc(
   // 填写0或者-0的时候取整
   if (resTypeConfig.deci === '0') {
     bpFixed(result, 0, false);
-  } else if (resTypeConfig) {
+  } else if (resTypeConfig.deci === '-0') {
     bpFixed(result, 0, false);
   } else if (deci < 0) {
     // 小数向下约

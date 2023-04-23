@@ -1,6 +1,6 @@
 import { BigNumber as ethBigNumber } from 'ethers';
-declare type NumStr = number | string;
-declare type BigNumStr = NumStr | ethBigNumber;
+type NumStr = number | string;
+type BigNumStr = NumStr | ethBigNumber;
 export interface IResType {
     hex?: boolean;
     digits?: number;

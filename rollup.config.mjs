@@ -11,7 +11,7 @@ import terser from '@rollup/plugin-terser';
 module.exports = {
   input: path.resolve(__dirname, 'src/main.ts'),
   output: {
-    file: path.resolve(__dirname, 'dist/bundle.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
+    file: path.resolve(__dirname, 'build/bundle.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
     format: 'es',
     sourcemap: false, // 还有ts中的sourcemap
   },
@@ -24,7 +24,7 @@ module.exports = {
       extensions: ['.js', '.ts'],
     }),
     types({
-      outDir: 'dist',
+      outDir: 'build',
       declaration: true,
       declarationDir: 'types',
     }),

@@ -1,3 +1,6 @@
+// "main": "rollup.config.js",
+// "type": "module",
+
 import { create, all, BigNumber, MathJsChain } from 'mathjs';
 import { ethers, BigNumber as ethBigNumber } from 'ethers';
 const parseUnits = ethers.utils.parseUnits;

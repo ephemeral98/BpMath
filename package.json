@@ -1,12 +1,13 @@
 {
-  "name": "createbpmath",
+  "name": "bp-math",
   "version": "1.0.0",
-  "description": "",
-  "main": "rollup.config.js",
-  "type": "module",
+  "description": "基于mathjs二次封装,主要用于blockpulse_dapp模板中",
+  "main": "dist/bundle.js",
+  "types": "dist/main.d.ts",
   "scripts": {
     "start": "rollup -c rollup.config.mjs --bundleConfigAsCjs"
   },
+  "keywords": ["blockpulse", "blockpulse_dapp", "mathjs"],
   "author": "",
   "license": "ISC",
   "devDependencies": {

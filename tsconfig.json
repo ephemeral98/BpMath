@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+    "strict": false,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "isolatedModules": false,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@css/*": ["./src/assets/css/*"],
+      "@img/*": ["./src/assets/img/*"],
+      "@cps/*": ["./src/components/*"],
+      "@store/*": ["./src/store/*"],
+      "@contApi/*": ["./src/contractsApi/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@tools/*": ["./src/tools/*"],
+      "@bpMath/*": ["./src/bpMath/*"]
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+  },
+
+}

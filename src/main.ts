@@ -21,7 +21,7 @@ const math = create(all, config as any);
 
 interface IParams {
   hex?: boolean; // 是否转为ethers的 16进制的bigNumber
-  deci?: number | '0' | '-0'; // 保留n位小数
+  deci?: number; // 保留n位小数
   fillZero?: boolean; // 不足填补0
 }
 
@@ -86,10 +86,10 @@ function bpBaseCalc(
   if (+result === Infinity || math.isNaN(+result)) result = '0';
 
   // 填写0或者-0的时候取整
-  if (resTypeConfig.deci === '0') {
+  if (Object.is(resTypeConfig.deci, 0)) {
     bpFixed(result, 0, false);
-  } else if (resTypeConfig.deci === '-0') {
-    bpFixed(result, 0, false);
+  } else if (Object.is(resTypeConfig.deci, -0)) {
+    bpFloor(result, 0, false);
   } else if (deci < 0) {
     // 小数向下约
     result = String(bpFloor(result, preci, true));
@@ -113,6 +113,7 @@ function bpBaseCalc(
  * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
+ * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
 export function bpAdd(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
@@ -125,6 +126,7 @@ export function bpAdd(...params: [...BigNumStr[], IParams | BigNumStr]): string 
  * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
+ * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
 export function bpSub(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
@@ -137,6 +139,7 @@ export function bpSub(...params: [...BigNumStr[], IParams | BigNumStr]): string 
  * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
+ * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
 export function bpMul(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
@@ -149,6 +152,7 @@ export function bpMul(...params: [...BigNumStr[], IParams | BigNumStr]): string 
  * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
+ * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
 export function bpDiv(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {

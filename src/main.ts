@@ -69,9 +69,9 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
 
   // 填写0或者-0的时候取整
   if (Object.is(resTypeConfig.deci, 0)) {
-    bpFixed(result, 0, false);
+    result = bpFixed(result, 0, false);
   } else if (Object.is(resTypeConfig.deci, -0)) {
-    bpFloor(result, 0, false);
+    result = bpFloor(result, 0, false);
   } else if (deci < 0) {
     // 小数向下约
     result = String(bpFloor(result, preci, true));

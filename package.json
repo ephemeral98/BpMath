@@ -1,6 +1,6 @@
 {
   "name": "bp-math",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "基于mathjs二次封装,主要用于blockpulse_dapp模板中",
   "main": "build/bundle.js",
   "types": "build/types/main.d.ts",
@@ -12,7 +12,11 @@
     "type": "git",
     "url": "https://github.com/ephemeral98/BpMath"
   },
-  "keywords": ["blockpulse", "blockpulse_dapp", "mathjs"],
+  "keywords": [
+    "blockpulse",
+    "blockpulse_dapp",
+    "mathjs"
+  ],
   "author": "",
   "license": "ISC"
 }

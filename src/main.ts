@@ -4,11 +4,6 @@ const parseUnits = ethers.utils.parseUnits;
 type NumStr = number | string;
 type BigNumStr = NumStr | ethBigNumber;
 
-export interface IResType {
-  hex?: boolean;
-  digits?: number;
-}
-
 const config = {
   epsilon: 1e-12,
   // matrix: 'Matrix' as '"Matrix" | "Array"', // 函数的默认矩阵输出类型。
@@ -20,7 +15,6 @@ const config = {
 const math = create(all, config as any);
 
 interface IParams {
-  hex?: boolean; // 是否转为ethers的 16进制的bigNumber
   deci?: number; // 保留n位小数
   fillZero?: boolean; // 不足填补0
 }
@@ -33,10 +27,6 @@ interface IParams {
  *
  * 如果想带保持3位小数
  * bpMul(3, 2, { deci: 3 }) --> 6.000
- *
- * 带精度入参用：
- * bpMul(3, 10 ** 18, { hex: true }) --> 0x53444835ec580000
- * 出来是默认带有18精度的bigNumber
  */
 
 /**
@@ -45,22 +35,14 @@ interface IParams {
  * @param params
  * @returns
  */
-function bpBaseCalc(
-  funcName: string,
-  ...params: [...BigNumStr[], IParams | BigNumStr]
-): string | ethBigNumber {
+function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigNumStr]): string {
   const resTypeConfig: IParams = params[params.length - 1] as any;
 
   let deci = 0;
-  let hex = false;
   let resArr = params as number[];
 
-  if (
-    typeof resTypeConfig === 'object' &&
-    (Object.keys(resTypeConfig).includes('hex') || Object.keys(resTypeConfig).includes('deci'))
-  ) {
+  if (typeof resTypeConfig === 'object' && Object.keys(resTypeConfig).includes('deci')) {
     // 写了配置项
-    hex = resTypeConfig.hex ?? hex;
     deci = +resTypeConfig.deci ?? deci;
     resArr = params.filter((item, inx) => inx !== params.length - 1) as number[];
   }
@@ -95,67 +77,71 @@ function bpBaseCalc(
     result = String(bpFloor(result, preci, true));
   }
 
-  // 转进制
-  if (hex) {
-    // result = ethers.utils.parseUnits(result, preci ?? 18);
-  }
-
   // 不足时候不填0
   if (!resTypeConfig.fillZero && typeof result === 'string') {
     result = result.replace(/(\.\d*[1-9])0+$|\.0*$/, '$1');
   }
-  return hex ? ethers.utils.parseUnits(result, preci ?? 18) : result;
+  return result;
 }
 
 /**
  * 加法
  * @param params n 个数
- * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
-export function bpAdd(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
+export function bpAdd(...params: [...BigNumStr[], IParams | BigNumStr]): string {
   return bpBaseCalc('add', ...params);
 }
 
+interface ISub extends IParams {
+  pos?: boolean; // true表示不会小于0
+}
 /**
  * 减法
  * @param params n 个数
- * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
+ * @param pos true表示不会为负数，小于0则为0
  * @returns
  */
-export function bpSub(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
-  return bpBaseCalc('subtract', ...params);
+export function bpSub(...params: [...BigNumStr[], ISub | BigNumStr]): string {
+  let result = bpBaseCalc('subtract', ...params);
+  const resTypeConfig: IParams = params[params.length - 1] as any;
+
+  if (typeof resTypeConfig === 'object' && Object.keys(resTypeConfig).includes('pos')) {
+    // 强调不能小于0
+    if (bpLt(result, '0')) {
+      result = '0';
+    }
+  }
+  return result;
 }
 
 /**
  * 乘法
  * @param params n 个数
- * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
-export function bpMul(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
+export function bpMul(...params: [...BigNumStr[], IParams | BigNumStr]): string {
   return bpBaseCalc('multiply', ...params);
 }
 
 /**
  * 除法
  * @param params n 个数
- * @param hex 是否转为16进制的bigNumber(一般是带精度入参数用)
  * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
  */
-export function bpDiv(...params: [...BigNumStr[], IParams | BigNumStr]): string | ethBigNumber {
+export function bpDiv(...params: [...BigNumStr[], IParams | BigNumStr]): string {
   return bpBaseCalc('divide', ...params);
 }
 
@@ -386,3 +372,18 @@ export function toThousands(num) {
   });
   return res;
 }
+
+/**
+ * 是否为空数据
+ * @param target
+ * @returns true:是空 false:有值
+ */
+export const bpEmpty = (target): boolean => {
+  if (Array.isArray(target)) {
+    return !target.length;
+  }
+  if (typeof target === 'object') {
+    return !Object.keys(target).length;
+  }
+  return !target;
+};

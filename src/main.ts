@@ -383,7 +383,17 @@ export const bpEmpty = (target): boolean => {
     return !target.length;
   }
   if (typeof target === 'object') {
-    return !Object.keys(target).length;
+    const keys = Object.keys(target);
+    let notEmpty: any = keys.length;
+
+    if (keys.includes('_isBigNumber') && target['_isBigNumber']) {
+      // 是bigNumber
+      notEmpty = +target['_hex'];
+    }
+    return !notEmpty;
+  }
+  if (typeof target === 'string') {
+    return !+target;
   }
   return !target;
 };

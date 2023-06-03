@@ -379,21 +379,104 @@ export function toThousands(num) {
  * @returns true:是空 false:有值
  */
 export const bpEmpty = (target): boolean => {
-  if (Array.isArray(target)) {
-    return !target.length;
-  }
-  if (typeof target === 'object') {
-    const keys = Object.keys(target);
-    let notEmpty: any = keys.length;
+  const markObj = { mark: true }; // 标记
 
-    if (keys.includes('_isBigNumber') && target['_isBigNumber']) {
-      // 是bigNumber
-      notEmpty = +target['_hex'];
+  /**
+   * 判断基本数据类型
+   * @param base 数据
+   * @param markObj 标记
+   */
+  const isEmptyBase = (base, markObj) => {
+    if (typeof base === 'string' && base.startsWith('0x')) {
+      // 一般是地址（16进制）
+      if (+base) {
+        markObj.mark = false;
+      }
+    } else if (base) {
+      markObj.mark = false;
+      return false;
     }
-    return !notEmpty;
+  };
+
+  /**
+   * 判断数组
+   * @param base 数据
+   * @param markObj 标记
+   */
+  const isEmptyArr = (arr, markObj) => {
+    for (let i = 0, len = arr.length; i < len; i++) {
+      const item = arr[i];
+      if (Array.isArray(item)) {
+        isEmptyArr(item, markObj);
+      } else if (Object.prototype.toString.call(item) === '[object Object]') {
+        if (item['__v_isRef']) {
+          // 是一个vue ref
+          if (Array.isArray(item.value)) {
+            isEmptyArr(item.value, markObj);
+          } else if (Object.prototype.toString.call(item.value) === '[object Object]') {
+            isEmptyObj(item.value, markObj);
+          } else {
+            isEmptyBase(item.value, markObj);
+          }
+        } else {
+          isEmptyObj(item, markObj);
+        }
+      } else {
+        isEmptyBase(item, markObj);
+      }
+    }
+  };
+
+  /**
+   * 判断对象
+   * @param base 数据
+   * @param markObj 标记
+   */
+  const isEmptyObj = (obj, markObj) => {
+    for (const key in obj) {
+      if (Object.hasOwnProperty.call(obj, key)) {
+        const item = obj[key];
+
+        if (Array.isArray(item)) {
+          isEmptyArr(item, markObj);
+        } else if (Object.prototype.toString.call(item) === '[object Object]') {
+          if (item['__v_isRef']) {
+            // 是一个vue ref
+            if (Array.isArray(item.value)) {
+              isEmptyArr(item.value, markObj);
+            } else if (Object.prototype.toString.call(item.value) === '[object Object]') {
+              isEmptyObj(item.value, markObj);
+            } else {
+              isEmptyBase(item.value, markObj);
+            }
+          } else {
+            isEmptyObj(item, markObj);
+          }
+        } else {
+          isEmptyBase(item, markObj);
+        }
+      }
+    }
+  };
+
+  if (Array.isArray(target)) {
+    isEmptyArr(target, markObj);
+  } else if (Object.prototype.toString.call(target) === '[object Object]') {
+    if (target['__v_isRef']) {
+      // 是一个vue ref
+      if (Array.isArray(target.value)) {
+        isEmptyArr(target.value, markObj);
+      } else if (Object.prototype.toString.call(target.value) === '[object Object]') {
+        isEmptyObj(target.value, markObj);
+      } else {
+        isEmptyBase(target.value, markObj);
+      }
+    } else {
+      isEmptyObj(target, markObj);
+    }
+  } else {
+    isEmptyBase(target, markObj);
   }
-  if (typeof target === 'string') {
-    return !+target;
-  }
-  return !target;
+
+  return markObj.mark;
 };

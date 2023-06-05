@@ -387,7 +387,9 @@ export const bpEmpty = (target): boolean => {
    * @param markObj 标记
    */
   const isEmptyBase = (base, markObj) => {
-    if (typeof base === 'string' && base.startsWith('0x')) {
+    if (base === '0' || base === 'undefined' || base === 'null' || base === 'false') {
+      markObj.mark = true;
+    } else if (typeof base === 'string' && base.startsWith('0x')) {
       // 一般是地址（16进制）
       if (+base) {
         markObj.mark = false;

@@ -54,7 +54,6 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
   let resArr = params as number[];
 
   if (hasConfig()) {
-    console.log('有配置。。。');
     // 写了配置项, 把最后一项除掉
     deci = +resTypeConfig.deci ?? deci;
     resArr = params.filter((item, inx) => inx !== params.length - 1) as number[];
@@ -249,7 +248,6 @@ function isObject(obj) {
  * @returns true: 非法数
  */
 function _isValid(num: string | number | ethBigNumber): boolean {
-  let status = false;
   // 非数
   if (num === null || num === undefined) {
     return true;
@@ -259,9 +257,10 @@ function _isValid(num: string | number | ethBigNumber): boolean {
     return true;
   } else if (isNaN(+num)) {
     return true;
-  } else if (!status) {
-    return false;
+  } else if (!num) {
+    return true;
   }
+  return false;
 }
 
 /**

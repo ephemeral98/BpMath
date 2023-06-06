@@ -1,10 +1,6 @@
 {
   "name": "bp-math",
-<<<<<<< HEAD
   "version": "1.1.9",
-=======
-  "version": "1.1.7",
->>>>>>> 175b20c3dc7edcbdd64981b7947175fcc82a3e7d
   "description": "基于mathjs二次封装,主要用于blockpulse_dapp模板中",
   "main": "build/bundle.js",
   "types": "build/types/main.d.ts",

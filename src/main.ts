@@ -63,7 +63,7 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
   const cloneParams = resArr.map((item: any) => {
     // 防止参数是一个ref对象
     const cloneItem = item?.['__v_isRef'] ? item.value : item;
-    return _isValid(cloneItem) ? 0 : math.bignumber(String(cloneItem));
+    return _isInvalid(cloneItem) ? 0 : math.bignumber(String(cloneItem));
   });
 
   let bigNum = math.chain(math[funcName](cloneParams[0], cloneParams[1]));
@@ -222,7 +222,7 @@ export function bpFormat(num, digits: number = 0, dec: number = 18): string {
   let digi = Math.abs(digits);
 
   // 非法值
-  if (_isValid(num)) {
+  if (_isInvalid(num)) {
     const res = 0;
     return digits ? res.toFixed(digi) : '0';
   }
@@ -232,7 +232,9 @@ export function bpFormat(num, digits: number = 0, dec: number = 18): string {
     // 小数向下约
     res = bpFloor(res, digi, true);
   }
-  return bpFixed(res, digi, true);
+
+  const temp = bpFixed(res, digi, true);
+  return temp;
 }
 
 /**
@@ -247,7 +249,7 @@ function isObject(obj) {
  * 判断是否位非法数
  * @returns true: 非法数
  */
-function _isValid(num: string | number | ethBigNumber): boolean {
+function _isInvalid(num: string | number | ethBigNumber): boolean {
   // 非数
   if (num === null || num === undefined) {
     return true;
@@ -260,6 +262,7 @@ function _isValid(num: string | number | ethBigNumber): boolean {
   } else if (!num) {
     return true;
   }
+
   return false;
 }
 
@@ -346,7 +349,7 @@ function baseFixed(
 ): string {
   // 克隆要约的数，变成字符串
   const num = v['__v_isRef']?.value || v;
-  const cloneNum: string = _isValid(num) ? String(num) : '0';
+  const cloneNum: string = _isInvalid(num) ? '0' : String(num);
 
   let result: string = '0';
   if (type === EType.ceil) {

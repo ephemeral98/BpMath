@@ -18,18 +18,17 @@
     "allowJs": true,
     "noImplicitAny": false,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@css/*": ["./src/assets/css/*"],
-      "@img/*": ["./src/assets/img/*"],
-      "@cps/*": ["./src/components/*"],
-      "@store/*": ["./src/store/*"],
-      "@contApi/*": ["./src/contractsApi/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@tools/*": ["./src/tools/*"],
-      "@bpMath/*": ["./src/bpMath/*"]
-    },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
 
+  "extends": "ts-node/node16/tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+    // Tell ts-node CLI to install the --loader automatically, explained below
+    "esm": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  }
 }

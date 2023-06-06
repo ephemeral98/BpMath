@@ -38,24 +38,41 @@ interface IParams {
 function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigNumStr]): string {
   const resTypeConfig: IParams = params[params.length - 1] as any;
 
+  /**
+   * 判断是否写了配置项
+   */
+  const hasConfig = (): boolean => {
+    return (
+      isObject(resTypeConfig) &&
+      (Object.keys(resTypeConfig).includes('deci') ||
+        Object.keys(resTypeConfig).includes('fillZero') ||
+        Object.keys(resTypeConfig).includes('pos'))
+    );
+  };
+
   let deci = 0;
   let resArr = params as number[];
 
-  if (typeof resTypeConfig === 'object' && Object.keys(resTypeConfig).includes('deci')) {
-    // 写了配置项
+  if (hasConfig()) {
+    console.log('有配置。。。');
+    // 写了配置项, 把最后一项除掉
     deci = +resTypeConfig.deci ?? deci;
     resArr = params.filter((item, inx) => inx !== params.length - 1) as number[];
   }
   const preci = Math.abs(deci);
   // 映射为bigNumber数组
-  const cloneParams = resArr.map((item) => (item ? math.bignumber(String(item)) : 0));
+  const cloneParams = resArr.map((item: any) => {
+    // 防止参数是一个ref对象
+    const cloneItem = item?.['__v_isRef'] ? item.value : item;
+    return _isValid(cloneItem) ? 0 : math.bignumber(String(cloneItem));
+  });
 
   let bigNum = math.chain(math[funcName](cloneParams[0], cloneParams[1]));
 
   // bigNumber累加
   if (cloneParams.length > 2) {
-    for (let i = 2, len = resArr.length; i < len; i++) {
-      bigNum = bigNum[funcName](String(resArr[i])) as MathJsChain<0 | BigNumber>;
+    for (let i = 2, len = cloneParams.length; i < len; i++) {
+      bigNum = bigNum[funcName](String(cloneParams[i])) as MathJsChain<0 | BigNumber>;
     }
   }
 
@@ -68,9 +85,9 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
   if (+result === Infinity || math.isNaN(+result)) result = '0';
 
   // 填写0或者-0的时候取整
-  if (Object.is(resTypeConfig.deci, 0)) {
+  if (Object.is(resTypeConfig?.deci, 0)) {
     result = bpFixed(result, 0, false);
-  } else if (Object.is(resTypeConfig.deci, -0)) {
+  } else if (Object.is(resTypeConfig?.deci, -0)) {
     result = bpFloor(result, 0, false);
   } else if (deci < 0) {
     // 小数向下约
@@ -78,7 +95,7 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
   }
 
   // 不足时候不填0
-  if (!resTypeConfig.fillZero && typeof result === 'string') {
+  if (!resTypeConfig?.fillZero && typeof result === 'string') {
     result = result.replace(/(\.\d*[1-9])0+$|\.0*$/, '$1');
   }
   return result;
@@ -112,7 +129,11 @@ export function bpSub(...params: [...BigNumStr[], ISub | BigNumStr]): string {
   let result = bpBaseCalc('subtract', ...params);
   const resTypeConfig: IParams = params[params.length - 1] as any;
 
-  if (typeof resTypeConfig === 'object' && Object.keys(resTypeConfig).includes('pos')) {
+  if (
+    typeof resTypeConfig === 'object' &&
+    Object.keys(resTypeConfig).includes('pos') &&
+    !!resTypeConfig['pos']
+  ) {
     // 强调不能小于0
     if (bpLt(result, '0')) {
       result = '0';
@@ -201,8 +222,8 @@ export function bpEthHex(num, dec = 18) {
 export function bpFormat(num, digits: number = 0, dec: number = 18): string {
   let digi = Math.abs(digits);
 
-  // 没有值
-  if (!+num) {
+  // 非法值
+  if (_isValid(num)) {
     const res = 0;
     return digits ? res.toFixed(digi) : '0';
   }
@@ -216,34 +237,31 @@ export function bpFormat(num, digits: number = 0, dec: number = 18): string {
 }
 
 /**
- * 判断是否位非法数
+ * 判断是不是对象
+ * @param obj
  */
-function _isValid(num: string | number | ethBigNumber): boolean {
-  let status = true;
-  // 非数
-  if (math.isNaN(+num) || num === null) {
-    status = false;
-  }
-  // 16进制不支持
-  if (String(num).startsWith('0x')) {
-    status = false;
-  }
-  if (!status) {
-    console.log('数字不合法:', num);
-  }
-  return status;
+function isObject(obj) {
+  return Object.prototype.toString.call(obj) === '[object Object]';
 }
 
 /**
- * 填充0
- * @param len 填充长度
+ * 判断是否位非法数
+ * @returns true: 非法数
  */
-function _fillZero(len: number) {
-  let c = '';
-  for (let i = 0; i < len; i++) {
-    c += '0';
+function _isValid(num: string | number | ethBigNumber): boolean {
+  let status = false;
+  // 非数
+  if (num === null || num === undefined) {
+    return true;
+  } else if (!['object', 'string', 'number'].includes(typeof num)) {
+    return true;
+  } else if (isObject(num) && !num['_isBigNumber']) {
+    return true;
+  } else if (isNaN(+num)) {
+    return true;
+  } else if (!status) {
+    return false;
   }
-  return c;
 }
 
 /**
@@ -279,7 +297,7 @@ export function bpFixed(
   dec: number = 0,
   isFill: boolean = false
 ): string {
-  return baseFixed(num, dec, isFill, 'fixed');
+  return baseFixed(num, dec, isFill, EType.fixed);
 }
 
 /**
@@ -294,7 +312,7 @@ export function bpFloor(
   dec: number = 0,
   isFill: boolean = false
 ): string {
-  return baseFixed(num, dec, isFill, 'floor');
+  return baseFixed(num, dec, isFill, EType.floor);
 }
 
 /**
@@ -309,28 +327,34 @@ export function bpCeil(
   dec: number = 0,
   isFill: boolean = false
 ): string {
-  return baseFixed(num, dec, isFill, 'ceil');
+  return baseFixed(num, dec, isFill, EType.ceil);
 }
 
 /**
  * 向上约、向下约、四舍五入、基础方法
  */
-type IType = 'ceil' | 'floor' | 'fixed';
+enum EType {
+  ceil = 'ceil',
+  floor = 'floor',
+  fixed = 'fixed',
+}
+
 function baseFixed(
-  num: string | number | ethBigNumber,
+  v: string | number | ethBigNumber,
   dec: number = 0,
   isFill: boolean = false,
-  type: IType
+  type: EType
 ): string {
   // 克隆要约的数，变成字符串
+  const num = v['__v_isRef']?.value || v;
   const cloneNum: string = _isValid(num) ? String(num) : '0';
 
   let result: string = '0';
-  if (type === 'ceil') {
+  if (type === EType.ceil) {
     result = math.bignumber(cloneNum).toFixed(dec, 2);
-  } else if (type === 'floor') {
+  } else if (type === EType.floor) {
     result = math.bignumber(cloneNum).toFixed(dec, 3);
-  } else if (type === 'fixed') {
+  } else if (type === EType.fixed) {
     result = math.bignumber(cloneNum).toFixed(dec);
   }
 
@@ -396,7 +420,6 @@ export const bpEmpty = (target): boolean => {
       }
     } else if (base) {
       markObj.mark = false;
-      return false;
     }
   };
 
@@ -410,12 +433,12 @@ export const bpEmpty = (target): boolean => {
       const item = arr[i];
       if (Array.isArray(item)) {
         isEmptyArr(item, markObj);
-      } else if (Object.prototype.toString.call(item) === '[object Object]') {
+      } else if (isObject(item)) {
         if (item['__v_isRef']) {
           // 是一个vue ref
           if (Array.isArray(item.value)) {
             isEmptyArr(item.value, markObj);
-          } else if (Object.prototype.toString.call(item.value) === '[object Object]') {
+          } else if (isObject(item.value)) {
             isEmptyObj(item.value, markObj);
           } else {
             isEmptyBase(item.value, markObj);
@@ -441,12 +464,12 @@ export const bpEmpty = (target): boolean => {
 
         if (Array.isArray(item)) {
           isEmptyArr(item, markObj);
-        } else if (Object.prototype.toString.call(item) === '[object Object]') {
+        } else if (isObject(item)) {
           if (item['__v_isRef']) {
             // 是一个vue ref
             if (Array.isArray(item.value)) {
               isEmptyArr(item.value, markObj);
-            } else if (Object.prototype.toString.call(item.value) === '[object Object]') {
+            } else if (isObject(item.value)) {
               isEmptyObj(item.value, markObj);
             } else {
               isEmptyBase(item.value, markObj);
@@ -463,12 +486,12 @@ export const bpEmpty = (target): boolean => {
 
   if (Array.isArray(target)) {
     isEmptyArr(target, markObj);
-  } else if (Object.prototype.toString.call(target) === '[object Object]') {
+  } else if (isObject(target)) {
     if (target['__v_isRef']) {
       // 是一个vue ref
       if (Array.isArray(target.value)) {
         isEmptyArr(target.value, markObj);
-      } else if (Object.prototype.toString.call(target.value) === '[object Object]') {
+      } else if (isObject(target.value)) {
         isEmptyObj(target.value, markObj);
       } else {
         isEmptyBase(target.value, markObj);

@@ -279,8 +279,6 @@ function _diviDot(num: string): IDiviDotRes {
   const iNum = num.slice(0, dotInx);
   let dNum = num.slice(dotInx);
 
-  // 如果没有小数： .0000、
-
   return {
     iNum,
     dNum: dotInx ? dNum : '',
@@ -506,4 +504,25 @@ export const bpEmpty = (target): boolean => {
   }
 
   return markObj.mark;
+};
+
+/**
+ * 简写0
+ * @param startLen 开始的长度
+ */
+export const simpleZero = (str: string, startLen: number = 2) => {
+  const { iNum, dNum } = _diviDot(str);
+  const pureDNum = dNum.replace(/^.?/, '');
+
+  const reg = /[1-9]/g;
+
+  const matchStr = reg.exec(pureDNum);
+  const inx = matchStr.index;
+  if (matchStr && inx >= startLen) {
+    // 匹配到
+    const notZero = matchStr.input.slice(inx);
+    return `${iNum}.0{${inx}}${notZero}`;
+  }
+
+  return str;
 };

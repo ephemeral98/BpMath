@@ -508,6 +508,7 @@ export const bpEmpty = (target): boolean => {
 
 /**
  * 简写0
+ * @param str 要转换的字符串
  * @param startLen 开始的长度
  */
 export const simpleZero = (str: string, startLen: number = 2) => {
@@ -517,7 +518,7 @@ export const simpleZero = (str: string, startLen: number = 2) => {
   const reg = /[1-9]/g;
 
   const matchStr = reg.exec(pureDNum);
-  const inx = matchStr.index;
+  const inx = matchStr?.index;
   if (matchStr && inx >= startLen) {
     // 匹配到
     const notZero = matchStr.input.slice(inx);

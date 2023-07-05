@@ -253,13 +253,17 @@ function _isInvalid(num: string | number | ethBigNumber): boolean {
   // 非数
   if (num === null || num === undefined) {
     return true;
-  } else if (!['object', 'string', 'number'].includes(typeof num)) {
+  }
+  if (!['object', 'string', 'number'].includes(typeof num)) {
     return true;
-  } else if (isObject(num) && !num['_isBigNumber']) {
+  }
+  if (isObject(num) && !num['_isBigNumber']) {
     return true;
-  } else if (isNaN(+num)) {
+  }
+  if (isNaN(+num)) {
     return true;
-  } else if (!num) {
+  }
+  if (!num) {
     return true;
   }
 
@@ -509,20 +513,25 @@ export const bpEmpty = (target): boolean => {
 /**
  * 简写0
  * @param str 要转换的字符串
- * @param startLen 开始的长度
+ * @param startLen 开始的0数量长度,默认当前面的0超过2个的时候才会处理
+ * @param lens 截取长度（防止转换后小数依旧过长）
+ * 只有满足 startLen 数量长度0 的小数才会被处理
+ * 比如：3.000123, 这里小数开始有超过2位0数量，会被简写为：3.0{3}123
  */
-export const simpleZero = (str: string, startLen: number = 2) => {
+export const simpleZero = (str: string, startLen: number = 2, lens: number = 4) => {
   const { iNum, dNum } = _diviDot(str);
   const pureDNum = dNum.replace(/^.?/, '');
 
   const reg = /[1-9]/g;
 
   const matchStr = reg.exec(pureDNum);
-  const inx = matchStr?.index;
+  const inx = matchStr?.index ?? 0;
+
   if (matchStr && inx >= startLen) {
     // 匹配到
-    const notZero = matchStr.input.slice(inx);
-    return `${iNum}.0{${inx}}${notZero}`;
+    const notZero = matchStr.input.slice(inx, inx + lens);
+
+    return `${iNum}.0{${String(inx)}}${notZero}`;
   }
 
   return str;

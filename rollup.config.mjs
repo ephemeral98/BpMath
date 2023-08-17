@@ -12,7 +12,7 @@ module.exports = {
   input: path.resolve(__dirname, 'src/main.ts'),
   output: {
     file: path.resolve(__dirname, 'build/bundle.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
-    format: 'es',
+    format: 'cjs',
     sourcemap: false, // 还有ts中的sourcemap
   },
   plugins: [

@@ -1,8 +1,6 @@
 import { create, all, BigNumber, MathJsChain } from 'mathjs';
-import { ethers, BigNumber as ethBigNumber } from 'ethers';
-const parseUnits = ethers.utils.parseUnits;
-type NumStr = number | string;
-type BigNumStr = NumStr | ethBigNumber;
+type NumStr = number | string | bigint;
+type BigNumStr = NumStr;
 
 const config = {
   epsilon: 1e-12,
@@ -75,7 +73,7 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
     }
   }
 
-  let result: string | ethBigNumber = math.format(bigNum.done(), {
+  let result: string = math.format(bigNum.done(), {
     notation: 'fixed',
     precision: deci > 0 ? preci : 0,
   });
@@ -103,7 +101,7 @@ function bpBaseCalc(funcName: string, ...params: [...BigNumStr[], IParams | BigN
 /**
  * 加法
  * @param params n 个数
- * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
+ * @param deci 精度(如果是16进制，则为精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
@@ -118,7 +116,7 @@ interface ISub extends IParams {
 /**
  * 减法
  * @param params n 个数
- * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
+ * @param deci 精度(如果是16进制，则为精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @param pos true表示不会为负数，小于0则为0
@@ -144,7 +142,7 @@ export function bpSub(...params: [...BigNumStr[], ISub | BigNumStr]): string {
 /**
  * 乘法
  * @param params n 个数
- * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
+ * @param deci 精度(如果是16进制，则为精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
@@ -156,7 +154,7 @@ export function bpMul(...params: [...BigNumStr[], IParams | BigNumStr]): string 
 /**
  * 除法
  * @param params n 个数
- * @param deci 精度(如果是16进制，则为ethers的精度，如果是10进制则约为几位小数)
+ * @param deci 精度(如果是16进制，则为精度，如果是10进制则约为几位小数)
  * 如果 deci 为负数，则表示 小数往下约，否则默认四舍五入
  * @param fillZero 不足位数是否补0，默认是小数最后的0去除
  * @returns
@@ -169,72 +167,32 @@ export function bpDiv(...params: [...BigNumStr[], IParams | BigNumStr]): string 
  * 比较两个数的大小, a 是否小于 b
  */
 export function bpLt(a: BigNumStr, b: BigNumStr): boolean {
-  let num1 = a ? parseUnits(String(a)) : parseUnits('0');
-  let num2 = b ? parseUnits(String(b)) : parseUnits('0');
-  return num1.lt(num2);
+  const resp = math.compare(String(a), String(b));
+  return resp === -1;
 }
 
 /**
  * 比较两个数的大小, a 是否小于等于 b
  */
 export function bpLte(a: BigNumStr, b: BigNumStr): boolean {
-  let num1 = a ? parseUnits(String(a)) : parseUnits('0');
-  let num2 = b ? parseUnits(String(b)) : parseUnits('0');
-  return num1.lte(num2);
+  const resp = math.compare(String(a), String(b));
+  return resp === -1 || resp === 0;
 }
 
 /**
  * 比较两个数的大小, a 是否大于 b
  */
 export function bpGt(a: BigNumStr, b: BigNumStr): boolean {
-  let num1 = a ? parseUnits(String(a)) : parseUnits('0');
-  let num2 = b ? parseUnits(String(b)) : parseUnits('0');
-  return num1.gt(num2);
+  const resp = math.compare(String(a), String(b));
+  return resp === 1;
 }
 
 /**
  * 比较两个数的大小, a 是否大于等于 b
  */
 export function bpGte(a: BigNumStr, b: BigNumStr): boolean {
-  let num1 = a ? parseUnits(String(a)) : parseUnits('0');
-  let num2 = b ? parseUnits(String(b)) : parseUnits('0');
-  return num1.gte(num2);
-}
-
-/**
- * 将普通字符串转为16进制的bigNumber
- * @param num 要转的数
- * @param dec 精度
- */
-export function bpEthHex(num, dec = 18) {
-  const resp = ethers.utils.parseUnits(String(num), dec);
-  return resp;
-}
-
-/**
- * 将ethers的16进制bigNumber转为String
- * @param num 要转的数
- * @param digits 保留n位小数
- * 如果 digits 为负数，则表示 小数往下约，否则默认四舍五入
- * @param dec 精度
- */
-export function bpFormat(num, digits: number = 0, dec: number = 18): string {
-  let digi = Math.abs(digits);
-
-  // 非法值
-  if (_isInvalid(num)) {
-    const res = 0;
-    return digits ? res.toFixed(digi) : '0';
-  }
-
-  let res: any = ethers.utils.formatUnits(num, dec);
-  if (digits < 0) {
-    // 小数向下约
-    res = bpFloor(res, digi, true);
-  }
-
-  const temp = bpFixed(res, digi, true);
-  return temp;
+  const resp = math.compare(String(a), String(b));
+  return resp === -1 || resp === 0;
 }
 
 /**
@@ -249,15 +207,21 @@ function isObject(obj) {
  * 判断是否位非法数
  * @returns true: 非法数
  */
-function _isInvalid(num: string | number | ethBigNumber): boolean {
+function _isInvalid(num: string | number | bigint): boolean {
   // 非数
   if (num === null || num === undefined) {
     return true;
   }
   if (!['object', 'string', 'number'].includes(typeof num)) {
+    // 这里包含了对象是因为有可能传进来的是一个 bigNumber
     return true;
   }
+  if (typeof num === 'bigint') {
+    // bigint例外，直接合法
+    return false;
+  }
   if (isObject(num) && !num['_isBigNumber']) {
+    // 如果是对象大类，并且不是 bigNumber 的，都是非法数
     return true;
   }
   if (isNaN(+num)) {
@@ -296,11 +260,7 @@ function _diviDot(num: string): IDiviDotRes {
  * @param isFill 不足是否填充0
  * @returns
  */
-export function bpFixed(
-  num: string | number | ethBigNumber,
-  dec: number = 0,
-  isFill: boolean = false
-): string {
+export function bpFixed(num: string | number, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.fixed);
 }
 
@@ -311,11 +271,7 @@ export function bpFixed(
  * @param isFill 不足时是否填充0
  * @returns
  */
-export function bpFloor(
-  num: string | number | ethBigNumber,
-  dec: number = 0,
-  isFill: boolean = false
-): string {
+export function bpFloor(num: string | number, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.floor);
 }
 
@@ -326,11 +282,7 @@ export function bpFloor(
  * @param isFill 不足时是否填充0
  * @returns
  */
-export function bpCeil(
-  num: string | number | ethBigNumber,
-  dec: number = 0,
-  isFill: boolean = false
-): string {
+export function bpCeil(num: string | number, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.ceil);
 }
 
@@ -344,7 +296,7 @@ enum EType {
 }
 
 function baseFixed(
-  v: string | number | ethBigNumber,
+  v: string | number,
   dec: number = 0,
   isFill: boolean = false,
   type: EType

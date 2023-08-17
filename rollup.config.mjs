@@ -45,5 +45,5 @@ module.exports = {
       open: true, // 默认打开浏览器
     }), */
   ],
-  external: ['mathjs', 'ethers'],
+  external: ['mathjs'],
 };

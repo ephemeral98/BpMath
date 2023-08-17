@@ -196,6 +196,32 @@ export function bpGte(a: BigNumStr, b: BigNumStr): boolean {
 }
 
 /**
+ * 将ethers的16进制bigNumber转为String
+ * @param num 要转的数
+ * @param digits 保留n位小数
+ * 如果 digits 为负数，则表示 小数往下约，否则默认四舍五入
+ * @param dec 精度
+ */
+export function bpFormat(num, digits: number = 0, dec: number = 18): string {
+  let digi = Math.abs(digits);
+
+  // 非法值
+  if (_isInvalid(num)) {
+    const res = 0;
+    return digits ? res.toFixed(digi) : '0';
+  }
+
+  let res: string = bpDiv(num, 10 ** dec);
+
+  if (digits < 0) {
+    // 小数向下约
+    return bpFloor(res, digi, true);
+  }
+
+  return bpFixed(res, digi, true);
+}
+
+/**
  * 判断是不是对象
  * @param obj
  */
@@ -207,7 +233,7 @@ function isObject(obj) {
  * 判断是否位非法数
  * @returns true: 非法数
  */
-function _isInvalid(num: string | number | bigint): boolean {
+function _isInvalid(num: NumStr | bigint): boolean {
   // 非数
   if (num === null || num === undefined) {
     return true;
@@ -260,7 +286,7 @@ function _diviDot(num: string): IDiviDotRes {
  * @param isFill 不足是否填充0
  * @returns
  */
-export function bpFixed(num: string | number, dec: number = 0, isFill: boolean = false): string {
+export function bpFixed(num: NumStr, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.fixed);
 }
 
@@ -271,7 +297,7 @@ export function bpFixed(num: string | number, dec: number = 0, isFill: boolean =
  * @param isFill 不足时是否填充0
  * @returns
  */
-export function bpFloor(num: string | number, dec: number = 0, isFill: boolean = false): string {
+export function bpFloor(num: NumStr, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.floor);
 }
 
@@ -282,7 +308,7 @@ export function bpFloor(num: string | number, dec: number = 0, isFill: boolean =
  * @param isFill 不足时是否填充0
  * @returns
  */
-export function bpCeil(num: string | number, dec: number = 0, isFill: boolean = false): string {
+export function bpCeil(num: NumStr, dec: number = 0, isFill: boolean = false): string {
   return baseFixed(num, dec, isFill, EType.ceil);
 }
 
@@ -295,12 +321,7 @@ enum EType {
   fixed = 'fixed',
 }
 
-function baseFixed(
-  v: string | number,
-  dec: number = 0,
-  isFill: boolean = false,
-  type: EType
-): string {
+function baseFixed(v: NumStr, dec: number = 0, isFill: boolean = false, type: EType): string {
   // 克隆要约的数，变成字符串
   const num = v['__v_isRef']?.value || v;
   const cloneNum: string = _isInvalid(num) ? '0' : String(num);

@@ -233,12 +233,12 @@ function isObject(obj) {
  * 判断是否位非法数
  * @returns true: 非法数
  */
-function _isInvalid(num: NumStr | bigint): boolean {
+function _isInvalid(num: NumStr): boolean {
   // 非数
   if (num === null || num === undefined) {
     return true;
   }
-  if (!['object', 'string', 'number'].includes(typeof num)) {
+  if (!['object', 'string', 'number', 'bigint'].includes(typeof num)) {
     // 这里包含了对象是因为有可能传进来的是一个 bigNumber
     return true;
   }

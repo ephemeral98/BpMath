@@ -192,7 +192,7 @@ export function bpGt(a: BigNumStr, b: BigNumStr): boolean {
  */
 export function bpGte(a: BigNumStr, b: BigNumStr): boolean {
   const resp = math.compare(String(a), String(b));
-  return resp === -1 || resp === 0;
+  return resp === 1 || resp === 0;
 }
 
 /**

@@ -323,7 +323,7 @@ enum EType {
 
 function baseFixed(v: NumStr, dec: number = 0, isFill: boolean = false, type: EType): string {
   // 克隆要约的数，变成字符串
-  let num;
+  let num: NumStr;
   if (isObject(v)) {
     num = v?.['__v_isRef']?.value || v;
   }

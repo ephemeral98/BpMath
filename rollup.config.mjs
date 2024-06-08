@@ -17,6 +17,11 @@ module.exports = {
       sourcemap: false, // 还有ts中的sourcemap
     },
     {
+      file: path.resolve(__dirname, 'build/bundle.cjs'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
+      format: 'cjs',
+      sourcemap: false, // 还有ts中的sourcemap
+    },
+    {
       file: path.resolve(__dirname, 'build/bundle.esm.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
       format: 'esm',
       sourcemap: false, // 还有ts中的sourcemap

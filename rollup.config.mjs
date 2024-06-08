@@ -10,11 +10,18 @@ import terser from '@rollup/plugin-terser';
 
 module.exports = {
   input: path.resolve(__dirname, 'src/main.ts'),
-  output: {
-    file: path.resolve(__dirname, 'build/bundle.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
-    format: 'cjs',
-    sourcemap: false, // 还有ts中的sourcemap
-  },
+  output: [
+    {
+      file: path.resolve(__dirname, 'build/bundle.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
+      format: 'cjs',
+      sourcemap: false, // 还有ts中的sourcemap
+    },
+    {
+      file: path.resolve(__dirname, 'build/bundle.esm.js'), // global: 弄个全局变量来接收 // cjs: module.exports // esm: export default // iife: ()() // umd: 兼容 amd + commonjs 不支持es6导入
+      format: 'esm',
+      sourcemap: false, // 还有ts中的sourcemap
+    },
+  ],
   plugins: [
     // 这个插件是有执行顺序的
     strip(), // 打包产物清除调试代码

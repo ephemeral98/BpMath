@@ -323,10 +323,7 @@ enum EType {
 
 function baseFixed(v: NumStr, dec: number = 0, isFill: boolean = false, type: EType): string {
   // 克隆要约的数，变成字符串
-  let num: NumStr;
-  if (isObject(v)) {
-    num = v?.['__v_isRef']?.value || v;
-  }
+  const num = v?.['__v_isRef']?.value || v;
   const cloneNum: string = _isInvalid(num) ? '0' : String(num);
 
   let result: string = '0';

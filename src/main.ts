@@ -377,9 +377,20 @@ export function toThousands(num) {
 /**
  * 是否为空数据
  * @param target
+ * @param ignoreType 忽略的类型
  * @returns true:是空 false:有值
  */
-export const bpEmpty = (target): boolean => {
+export const bpEmpty = (target, ignoreType: any[] = []): boolean => {
+  const baseType = ['0', 'undefined', 'null', 'false', ''];
+
+  /**
+   * 判断是不是对象
+   * @param obj
+   */
+  function isObject(obj) {
+    return Object.prototype.toString.call(obj) === '[object Object]';
+  }
+
   const markObj = { mark: true }; // 标记
 
   /**
@@ -388,9 +399,16 @@ export const bpEmpty = (target): boolean => {
    * @param markObj 标记
    */
   const isEmptyBase = (base, markObj) => {
-    if (base === '0' || base === 'undefined' || base === 'null' || base === 'false') {
+    const tempType = baseType.filter((item) => {
+      return !ignoreType.includes(item);
+    });
+
+    if (tempType.includes(base)) {
       markObj.mark = true;
-    } else if (typeof base === 'string' && base.startsWith('0x')) {
+      return true;
+    }
+
+    if (typeof base === 'string' && base.startsWith('0x')) {
       // 一般是地址（16进制）
       if (+base) {
         markObj.mark = false;
@@ -418,13 +436,19 @@ export const bpEmpty = (target): boolean => {
           } else if (isObject(item.value)) {
             isEmptyObj(item.value, markObj);
           } else {
-            isEmptyBase(item.value, markObj);
+            const r = isEmptyBase(item.value, markObj);
+            if (r) {
+              return;
+            }
           }
         } else {
           isEmptyObj(item, markObj);
         }
       } else {
-        isEmptyBase(item, markObj);
+        const r = isEmptyBase(item, markObj);
+        if (r) {
+          return;
+        }
       }
     }
   };
@@ -449,13 +473,19 @@ export const bpEmpty = (target): boolean => {
             } else if (isObject(item.value)) {
               isEmptyObj(item.value, markObj);
             } else {
-              isEmptyBase(item.value, markObj);
+              const r = isEmptyBase(item.value, markObj);
+              if (r) {
+                return;
+              }
             }
           } else {
             isEmptyObj(item, markObj);
           }
         } else {
-          isEmptyBase(item, markObj);
+          const r = isEmptyBase(item, markObj);
+          if (r) {
+            return;
+          }
         }
       }
     }
@@ -471,13 +501,19 @@ export const bpEmpty = (target): boolean => {
       } else if (isObject(target.value)) {
         isEmptyObj(target.value, markObj);
       } else {
-        isEmptyBase(target.value, markObj);
+        const r = isEmptyBase(target.value, markObj);
+        if (r) {
+          return;
+        }
       }
     } else {
       isEmptyObj(target, markObj);
     }
   } else {
-    isEmptyBase(target, markObj);
+    const r = isEmptyBase(target, markObj);
+    if (r) {
+      return;
+    }
   }
 
   return markObj.mark;

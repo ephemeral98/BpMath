@@ -32,6 +32,20 @@ function isLegacyBigNumber(value: unknown): value is BigNumberLike {
   );
 }
 
+/**
+ * Remove thousands separators from a conventionally grouped numeric string.
+ * Strings without commas are left unchanged so Decimal can continue to handle
+ * its other supported formats, such as scientific notation.
+ */
+function normalizeNumericString(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed === '') return undefined;
+  if (!trimmed.includes(',')) return trimmed;
+
+  const thousandsPattern = /^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:e[+-]?\d+)?$/i;
+  return thousandsPattern.test(trimmed) ? trimmed.replace(/,/g, '') : undefined;
+}
+
 export function toDecimal(value: NumericInput | unknown): Decimal {
   const unwrapped = unwrapRef(value);
 
@@ -47,9 +61,12 @@ export function toDecimal(value: NumericInput | unknown): Decimal {
     return Number.isFinite(unwrapped) ? new BpDecimal(unwrapped.toString()) : new BpDecimal(0);
   }
 
-  if (typeof unwrapped === 'string' && unwrapped.trim() !== '') {
+  if (typeof unwrapped === 'string') {
+    const normalized = normalizeNumericString(unwrapped);
+    if (normalized === undefined) return new BpDecimal(0);
+
     try {
-      return new BpDecimal(unwrapped);
+      return new BpDecimal(normalized);
     } catch {
       return new BpDecimal(0);
     }

@@ -11,9 +11,10 @@ pnpm add bp-math
 ## 使用
 
 ```ts
-import { bpAdd, bpDiv, bpFixed, bpFormat } from 'bp-math';
+import { bpAdd, bpDiv, bpFixed, bpFormat, bpSub } from 'bp-math';
 
 bpAdd('0.1', '0.2'); // '0.3'
+bpSub('7,199,254,740,993', '7,199,254,740,992'); // '1'
 bpDiv('1', '8'); // '0.125'
 bpFixed('1.235', 2); // '1.24'
 bpFormat('1000000000000000000', 2, 18); // '1.00'
@@ -22,6 +23,7 @@ bpFormat('1000000000000000000', 2, 18); // '1.00'
 ### 计算
 
 - `bpAdd` / `bpSub` / `bpMul` / `bpDiv`：高精度加减乘除。
+- 字符串输入支持标准千分位格式（如 `'1,234.56'`）；number 输入请写成 `1234.56`
 - `bpLt` / `bpLte` / `bpGt` / `bpGte`：高精度比较。
 - 最后一个参数可传 `{ deci, fillZero }`；`bpSub` 还支持 `{ pos: true }` 把负数限制为 `0`。
 - `deci` 为负数时向下截取，绝对值表示小数位数。

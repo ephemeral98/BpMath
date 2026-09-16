@@ -54,3 +54,24 @@ describe('comparisons', () => {
     expect(bpGt('9007199254740993', '9007199254740992')).toBe(true);
   });
 });
+
+describe('thousands-separated inputs', () => {
+  it('calculates conventionally grouped strings', () => {
+    expect(bpSub('7,199,254,740,993', '7,199,254,740,992')).toBe('1');
+    expect(bpAdd('1,234.5', '765.5')).toBe('2000');
+    expect(bpMul('-1,000', '2')).toBe('-2000');
+    expect(bpDiv('1,000', '8')).toBe('125');
+  });
+
+  it('continues to support number inputs without separators', () => {
+    expect(bpSub('7,199,254,740,993', 7199254740992)).toBe('1');
+  });
+
+  it('compares thousands-separated strings', () => {
+    expect(bpGt('9,007,199,254,740,993', '9,007,199,254,740,992')).toBe(true);
+  });
+
+  it('does not silently accept malformed grouping', () => {
+    expect(bpAdd('12,34', '1')).toBe('1');
+  });
+});

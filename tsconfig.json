@@ -1,35 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "esnext",
-    "strict": false,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "isolatedModules": false,
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "allowJs": true,
-    "noImplicitAny": false,
-    "baseUrl": ".",
-    // "declaration": true,
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
   },
-
-  "extends": "ts-node/node16/tsconfig.json",
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true,
-    // Tell ts-node CLI to install the --loader automatically, explained below
-    "esm": true,
-    "compilerOptions": {
-      "module": "ESNext"
-    }
-  }
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["build", "node_modules"]
 }

@@ -1,6 +1,6 @@
 {
   "name": "bp-math",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "基于 decimal.js 封装的轻量高精度数学工具库",
   "type": "module",
   "main": "./build/index.cjs",
